@@ -140,12 +140,12 @@ class AddressBook(UserDict):
 
             for date in str_week:
                 if compare == date:
-                    return f"{record.name}: {record.birthday.value}"
+                    yield f"{record.name}: {record.birthday.value}"
         
-    @input_error
-    def all_contacts(self):
-        for record in self.data.values():
-            return record
+    # @input_error
+    # def all_contacts(self):
+    #     for record in self.data.values():
+    #         #return record
 
     def __str__(self):
         return "\n".join(str(record) for record in self.data.values())

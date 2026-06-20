@@ -27,6 +27,11 @@ def add_birthday(args, book):
 def show_birthday(args, book):
     return book[args[0]].show_birthday()
 
+# @input_error
+# def get_upcoming_birthdays(book):
+#     for contact in book.get_upcoming_birthdays():
+#         print(contact)
+
 
 def main():
     book = AddressBook()
@@ -46,13 +51,15 @@ def main():
         elif command == "phone":
             print(find_phone_owner(args, book))
         elif command == "all":
-            print(book.all_contacts())
+            for element in book.values():
+                print(element)
         elif command == "add-birthday":
             print(add_birthday(args, book))
         elif command == "show-birthday":
             print(show_birthday(args, book))
         elif command == "birthdays":
-            print(book.get_upcoming_birthdays())
+            for line in book.get_upcoming_birthdays():
+                print(line)
         else:
             print("Invalid command.")
 
