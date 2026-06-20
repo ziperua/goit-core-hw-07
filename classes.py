@@ -5,11 +5,11 @@ def input_error(function):
     def inner(*args):
         try: return function(*args)
         except ValueError:
-            print("Give me valid arguments")
+            return "Give me valid arguments"
         except IndexError:
-            print("Enter the argument for the command")
+            return "Enter the argument for the command"
         except KeyError:
-            print("Enter correct name")
+            return "Enter correct name"
     return inner
 
 class Field:
@@ -24,14 +24,19 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value):
-        if not(value.isdigit() and len(value) == 10): 
+        if not(value.isdigit() and len(value) == 10):
             raise ValueError("Phone must contain 10 digits")
         super().__init__(value)
 
 class Birthday(Field):
     def __init__(self, value):
         try:
-            self.value = dt.datetime.strptime(value, "%d.%m.%Y").date()
+            day, month, year = value.split('.')
+            day, month, year = int(day), int(month), int(year)
+            if day > 31 or day < 1 or month > 12 or month < 1:
+                raise ValueError(print("Use real date in format DD.MM.YYYY and"))
+            self.value = value
+            
         except ValueError:
             raise ValueError("Invalid date format. Use DD.MM.YYYY")
     
@@ -44,7 +49,7 @@ class Record:
     @input_error
     def add_phone(self, phone):
         self.phones.append(Phone(phone))
-        print("Phone added") 
+        return "Phone added"
     
     # @input_error
     # def remove_phone(self, phone):
@@ -53,32 +58,31 @@ class Record:
 
     @input_error
     def edit_phone(self, old_phone, new_phone):
-        phone_obj = self.find_phone(old_phone)
+        phone_obj = self.find_phone_number(old_phone)
         if phone_obj is None:
             raise ValueError("Phone not found")
         phone_obj.value = Phone(new_phone).value
-        print("Phone changed")
+        return "Phone changed"
 
-    # @input_error
-    # def find_phone(self, phone):
-    #     for p in self.phones:
-    #         if p.value == phone:
-    #             return p
-    #     return None
+    @input_error
+    def find_phone_number(self, phone):
+        for p in self.phones:
+            if p.value == phone:
+                return p
+        return None
     
     @input_error
     def find_phone_owner(self):
-        for phone in self.phones:
-            print(phone)
+        return '; '.join(p.value for p in self.phones)
 
     @input_error
     def add_birthday(self, birthday):
         self.birthday = Birthday(birthday)
-        print("Birthday added")
+        return "Birthday added"
 
     @input_error
     def show_birthday(self):
-        print(self.birthday)
+        return self.birthday
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday}"
@@ -87,11 +91,26 @@ class AddressBook(UserDict):
     @input_error
     def add_record(self, record):
         self.data[record.name.value] = record
-        print("Record added")
+        return "Contact added"
     
-    # @input_error
-    # def find(self, name):
-    #     return self.data.get(name)
+    @input_error
+    def add_contact(args, book: AddressBook):
+        name, phone, *_ = args
+        Phone(phone)
+        record = book.find(name)
+        message = "Contact updated."
+        if record is None:
+            record = Record(name)
+            book.add_record(record)
+            message = "Contact added."
+        if phone:
+            record.add_phone(phone)
+        return message
+
+    
+    @input_error
+    def find(self, name):
+        return self.data.get(name)
 
     # @input_error
     # def delete(self, record):
@@ -106,17 +125,27 @@ class AddressBook(UserDict):
         while i < 7:
             week.append(dt.date.today() + dt.timedelta(i))
             i+=1
-
+        
         for record in self.data.values():
             if record.birthday == None:
-                continue 
-            if record.birthday.value in week:
-                print(f"{record.name}: {record.birthday}")
-    
+                continue
+
+            day, month, _ = record.birthday.value.split('.')
+            year = dt.date.today().year
+            if len(month) == 1:
+                compare = f"{year}-0{month}-{day}" # 0{month} because datetime getting month like this
+            else:
+                compare = f"{year}-{month}-{day}"
+            str_week = [str(date) for date in week]
+
+            for date in str_week:
+                if compare == date:
+                    return f"{record.name}: {record.birthday.value}"
+        
     @input_error
     def all_contacts(self):
         for record in self.data.values():
-            print(record)
+            return record
 
     def __str__(self):
         return "\n".join(str(record) for record in self.data.values())
