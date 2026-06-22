@@ -1,1 +1,0 @@
-In main are 5 methods out of main() function, because I was using args[] and except couldn't work good enough with this. Also I lived in classes.py many methods from previous work, in case of future work with this project - they can be useful
