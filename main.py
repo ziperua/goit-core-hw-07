@@ -48,7 +48,10 @@ def show_birthday(args, book):
 
 @input_error
 def birthdays(book):
-    return "\n".join(birthday for birthday in book.get_upcoming_birthdays())
+    result = book.get_upcoming_birthdays()
+    if not result:
+        return "No upcoming birthdays"
+    return "\n".join(f"{item['name']}: {item['congratulation_date']}" for item in result)
 
 
 def main():
